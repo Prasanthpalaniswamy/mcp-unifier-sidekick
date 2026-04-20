@@ -1,0 +1,20 @@
+SSE error: Non-200 status code (400) SSE error: Non-200 status code (400)
+ 
+ cline config code for local
+    // ,
+    // "base64-tools": {
+    //   "disabled": true,
+    //   "timeout": 60,
+    //   "type": "stdio",
+    //   "command": "python",
+    //   "args": [
+    //     "server.py"
+    //   ],
+    //   "cwd": "C:/DevWorks/Git_local_repo/Base64EncodeDecode"
+    // }
+
+    @asynccontextmanager
+async def lifespan(app):
+    # async with mcp_app.router.lifespan_context(mcp_app):
+    async with mcp.session_manager.run():
+        yield
