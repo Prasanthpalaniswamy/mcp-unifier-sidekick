@@ -18,3 +18,8 @@ async def lifespan(app):
     # async with mcp_app.router.lifespan_context(mcp_app):
     async with mcp.session_manager.run():
         yield
+
+mcp==1.26.0
+httpx==0.28.1
+python-dotenv==1.2.2
+uvicorn==0.41.0
