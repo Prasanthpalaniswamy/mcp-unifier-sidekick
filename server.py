@@ -14,9 +14,13 @@ from tools.visualization_tools import generate_chart_image, generate_summary_das
 from tools.session_store import UNIFIER_SESSIONS, get_session_key
 from dotenv import load_dotenv
 from mcp.server.fastmcp import Context
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse
+
 
 # Load variables from .env into the environment
 load_dotenv()
+MCP_API_KEY = os.getenv("MCP_API_KEY")
 
 mcp = FastMCP("Unifier Tools Server", host="0.0.0.0")
 
@@ -533,11 +537,44 @@ async def lifespan(app):
     async with mcp.session_manager.run():
         yield
 
+class AuthMiddleware(BaseHTTPMiddleware):
+
+    async def dispatch(self, request, call_next):
+
+        # Allow health endpoint without auth
+        if request.url.path == "/health":
+            return await call_next(request)
+
+        auth_header = request.headers.get("authorization")
+
+        if not auth_header:
+            return JSONResponse(
+                {"error": "Missing Authorization header"},
+                status_code=401
+            )
+
+        if not auth_header.startswith("Bearer "):
+            return JSONResponse(
+                {"error": "Invalid Authorization format"},
+                status_code=401
+            )
+
+        token = auth_header.split(" ")[1]
+
+        if token != MCP_API_KEY:
+            return JSONResponse(
+                {"error": "Invalid API key"},
+                status_code=403
+            )
+
+        return await call_next(request)
+    
 app = Starlette(routes=[
     Route("/health", healthcheck),
     Mount("/", app=mcp_app),
 ], lifespan=lifespan)
 
+app.add_middleware(AuthMiddleware)
 
 if __name__ == "__main__":
     transport = os.getenv("MCP_TRANSPORT", "http").lower()
