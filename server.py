@@ -20,6 +20,8 @@ from starlette.requests import Request
 # from starlette.responses import JSONResponse
 from jose import jwt, JWTError
 from datetime import datetime, timedelta, timedelta, UTC,timezone
+import bcrypt
+
 
 
 # Load variables from .env into the environment
@@ -30,7 +32,7 @@ JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_MINUTES = 60
 
 USERS = {
-    "admin": "password123"
+    "admin": "$2b$12$dcrMYjKqPOMmlZt4LZkGPubgxIuO/JzVQ1famaDvX7UAu.7tKhfBe"
 }
 
 def create_jwt_token(username):
@@ -59,12 +61,28 @@ async def login(request: Request):
     username = body.get("username")
     password = body.get("password")
 
-    if USERS.get(username) != password:
+    # if USERS.get(username) != password:
+    #     return JSONResponse(
+    #         {"error": "Invalid credentials"},
+    #         status_code=401
+    #     )
+
+    stored_hash = USERS.get(username)
+
+    if not stored_hash:
         return JSONResponse(
             {"error": "Invalid credentials"},
             status_code=401
         )
 
+    if not bcrypt.checkpw(
+        password.encode(),
+        stored_hash.encode()
+    ):
+        return JSONResponse(
+            {"error": "Invalid credentials"},
+            status_code=401
+        )
     token = create_jwt_token(username)
 
     return JSONResponse({
