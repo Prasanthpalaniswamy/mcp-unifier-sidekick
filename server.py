@@ -15,12 +15,62 @@ from tools.session_store import UNIFIER_SESSIONS, get_session_key
 from dotenv import load_dotenv
 from mcp.server.fastmcp import Context
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import JSONResponse
+from starlette.requests import Request
+# from starlette.responses import JSONResponse
+# from starlette.responses import JSONResponse
+from jose import jwt, JWTError
+from datetime import datetime, timedelta, timedelta, UTC,timezone
 
 
 # Load variables from .env into the environment
 load_dotenv()
 MCP_API_KEY = os.getenv("MCP_API_KEY")
+JWT_SECRET = os.getenv("JWT_SECRET")
+JWT_ALGORITHM = "HS256"
+JWT_EXPIRATION_MINUTES = 60
+
+USERS = {
+    "admin": "password123"
+}
+
+def create_jwt_token(username):
+
+    expiration = datetime.now(timezone.utc) + timedelta(
+        minutes=JWT_EXPIRATION_MINUTES
+    )
+
+    payload = {
+        "sub": username,
+        "exp": expiration
+    }
+
+    token = jwt.encode(
+        payload,
+        JWT_SECRET,
+        algorithm=JWT_ALGORITHM
+    )
+
+    return token
+
+async def login(request: Request):
+
+    body = await request.json()
+
+    username = body.get("username")
+    password = body.get("password")
+
+    if USERS.get(username) != password:
+        return JSONResponse(
+            {"error": "Invalid credentials"},
+            status_code=401
+        )
+
+    token = create_jwt_token(username)
+
+    return JSONResponse({
+        "access_token": token,
+        "token_type": "bearer"
+    })
 
 mcp = FastMCP("Unifier Tools Server", host="0.0.0.0")
 
@@ -541,8 +591,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request, call_next):
 
-        # Allow health endpoint without auth
-        if request.url.path == "/health":
+        if request.url.path in ["/health", "/login"]:
             return await call_next(request)
 
         auth_header = request.headers.get("authorization")
@@ -561,16 +610,26 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         token = auth_header.split(" ")[1]
 
-        if token != MCP_API_KEY:
+        try:
+            payload = jwt.decode(
+                token,
+                JWT_SECRET,
+                algorithms=[JWT_ALGORITHM]
+            )
+
+            request.state.user = payload["sub"]
+
+        except JWTError:
             return JSONResponse(
-                {"error": "Invalid API key"},
-                status_code=403
+                {"error": "Invalid or expired token"},
+                status_code=401
             )
 
         return await call_next(request)
     
 app = Starlette(routes=[
     Route("/health", healthcheck),
+    Route("/login", login, methods=["POST"]),
     Mount("/", app=mcp_app),
 ], lifespan=lifespan)
 
