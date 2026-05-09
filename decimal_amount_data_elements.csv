@@ -1,0 +1,3 @@
+﻿data_element,data_definition,form_label,description,tooltip,pre_defined_category,decimal_format
+IRR,Decimal Amount,IRR,,,,8
+Indirect_Financial_Return,Decimal Amount,Indirect Financial Return,,,,8

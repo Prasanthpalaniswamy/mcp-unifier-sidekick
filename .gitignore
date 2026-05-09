@@ -18,6 +18,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+#export folders
+test_exports/
+
 # Logs
 *.log
 .env

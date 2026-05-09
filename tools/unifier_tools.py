@@ -9,11 +9,70 @@ from typing import TypedDict, Optional
 from mcp.server.fastmcp import Context
 from tools.session_store import UNIFIER_SESSIONS, get_session_key
 
+from urllib.parse import urlparse
+
+REQUIRED_UNIFIER_PATH = "/ws/rest/service/v1"
+
+
+def normalize_base_url(base_url: str) -> str:
+    return base_url.strip().rstrip("/")
+
+
+def validate_base_url(base_url: str) -> str:
+    base_url = normalize_base_url(base_url)
+
+    parsed = urlparse(base_url)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        raise ValueError(
+            "Invalid base_url. Expected format like: "
+            "https://<hostname>:<port>/ws/rest/service/v1"
+        )
+
+    if not parsed.path.endswith(REQUIRED_UNIFIER_PATH):
+        raise ValueError(
+            "Invalid base_url. It must end with '/ws/rest/service/v1'. "
+            "Example: https://<hostname>:<port>/ws/rest/service/v1"
+        )
+
+    if base_url.endswith("/login"):
+        raise ValueError(
+            "Please provide the Unifier REST service base URL, not the login endpoint. "
+            "Example: https://<hostname>:<port>/ws/rest/service/v1"
+        )
+
+    return base_url
+
+
+def validate_username(username: str) -> str:
+    username = username.strip()
+    if not username:
+        raise ValueError("Username is required.")
+
+    if not username.startswith("$$"):
+        raise ValueError(
+            "Invalid username. Please provide an integration username that usually starts with '$$' "
+            "(example: $$intuser)."
+        )
+
+    return username
+
+
+def validate_password(password: str) -> str:
+    password = password.strip()
+    if not password:
+        raise ValueError("Password is required.")
+    return password
+
+
+
 def get_session(ctx: Context):
     session = UNIFIER_SESSIONS.get(get_session_key(ctx))
     if not session:
         raise ValueError(
-            "⚠️ Unifier session not initialized. Please provide base_url, username, password."
+           "⚠️ Unifier session not initialized. Please provide:\n"
+            "- base_url in the format http://<host>:<port>/ws/rest/service/v1\n"
+            "- integration username (usually starts with $$)\n"
+            "- password"
         )
     return session
 

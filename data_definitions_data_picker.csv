@@ -1,0 +1,53 @@
+data_element,display_element,name,used,category,data_source
+uf_eEmpFullName,Employee Full Name,Employee DP,Yes,Business Process,Employee
+title,Title (العنوان),UE cfg_SpecSec_DP,Yes,Business Process,Specification Section Template
+ue_bld_BldNameSSN,Building Name,Building DP 01,Yes,Shell Manager,Buildings
+uf_pmbt_Meter_NameTB120,Gauge / Meter Name,Meter DP,Yes,Business Process,Meter
+uf_ls_PrimyLseNoRN,Primary Lease Number,UF ls_Lease_DP,Yes,Business Process,Lease
+uf_ast_AssetNameTB50,Asset Name,Asset Pk,Yes,Business Process,Asset
+uf_gen_DisplayElmtTB255,Display Element,UF gen_Parcel_DP,Yes,Business Process,Parcel
+uf_SpaceNoTB255,Space Number,UF spc_LeasableSpace_DP,Yes,Space Manager,Leasable Space
+title,Title (العنوان),UE cfg_MasterAreaTemplate_DP,Yes,Business Process,Master Area Template
+uf_eEmpFullName,Employee Full Name,Employee Name DP,Yes,Business Process,Employee
+uf_ugenOrgNameTB50,Organization Name,Lease Payee DP,Yes,Business Process,Lease Contact
+uf_MaterialSKUMasterRND,Material SKU Master #,UF gen_MatSkuMaster DP,Yes,Business Process,Material SKU Master
+ue_gen_DisplayElmtTB255,Display Element,UF gen_FacilityMSA_DP,Yes,Business Process,Facility Master Service Agreement
+record_no,Record Number ( رقم السجل ),PM Book Template DP,Yes,Business Process,PM Book Template
+uf_ldc_LEEDLevelTB120,LEED Level,LeedLevel DP,Yes,Business Process,LEED Certification Levels
+ue_prj_SiteNameSSN,Campus/Site Name,Site DP 01,Yes,Shell Manager,Site/Campus
+uf_SpaceNameSSP,Space Name,Usable Space DP 01,Yes,Space Manager,Office Space
+ue_prj_SiteNameSSN,Campus/Site Name,Site DP,Yes,Shell Manager,Site/Campus
+uf_SpaceNameSSP,Space Name,Usable Space DP,Yes,Space Manager,Office Space
+ue_tms_RoleIDandNameTB250,Role ID and Name,UE tms_Role_DP,Yes,Business Process,Role
+title,Title (العنوان),UE cfg_FolderTemplate_DP,Yes,Business Process,Folder Template
+title,Title (العنوان),UE co_PotentialChangeOrder_DP,Yes,Business Process,Potential Change Order
+uuu_user_loginname,Login User Name,UE gen_Creator_DP,Yes,User Attributes,User Attributes
+record_no,Record Number ( رقم السجل ),PM Job Plan DP,Yes,Business Process,Job Plan
+title,Title (العنوان),UE co_ChangeRequest_DP,Yes,Business Process,Change Request
+record_no,Record Number ( رقم السجل ),Approved Feasibility Study Record,Yes,Business Process,Approved Feasibility Study
+uf_ven_DisplayElmtTB255,Vendor Display Element,UF gen_Vendor_DP,Yes,Business Process,Vendor
+uf_pmr_RoleNameTB120,Role Name,PM Role01 DP,Yes,Business Process,PM Role
+ue_org_OrgNameSSN,Organization Name,Organization Shell DP,Yes,Shell Manager,Organization
+uuu_user_name,Name,User PK,Yes,User Attributes,User Attributes
+ue_prj_ProgramNumNameTB255,Program Number and Name,UE gen_Program_DP,Yes,Shell Manager,Program
+uuu_user_name,Name,UE gen_MainContact_DP,Yes,User Attributes,User Attributes
+title,Title (العنوان),UE gen_PCCTemplate_DP,Yes,Business Process,Project Closeout Checklist
+uuu_user_name,Name,UE gen_User_DP,Yes,User Attributes,User Attributes
+title,Title (العنوان),UE cfg_ReportConfig_DP,Yes,Business Process,Report Configuration
+uuu_user_name,Name,User PK 01,Yes,User Attributes,User Attributes
+record_no,Record Number ( رقم السجل ),UF gen_EnergyMtr_DP,Yes,Business Process,Energy Meter
+uf_ugenOrgNameTB50,Organization Name,UF lsc_LeaseContact_DP,Yes,Business Process,Lease Contact
+ue_prj_ProjectNumNameTB255,Project Number and Name,UE gen_ProjectNumName_DP,Yes,Shell Manager,Projects
+ue_bld_BldCodeSSN,Building Code,UF gen_Building_DP,Yes,Shell Manager,Buildings
+uf_ast_AssetNameTB50,Asset Name,Asset Name DP,Yes,Business Process,Asset
+uf_whse_WhseNameSSN,Warehouse Name,UF gen_Warehouse DP,Yes,Shell Manager,Warehouse
+record_no,Record Number ( رقم السجل ),Asset Template DP,Yes,Business Process,Asset Template
+ue_bld_BldCodeNameTB255,Building Code and Name,UE req_Building_DP,Yes,Shell Manager,Buildings
+record_no,Record Number ( رقم السجل ),Asset DP,Yes,Business Process,Asset
+uuu_index_code,Index Code,UF ls_IndexRate DP,Yes,Business Process,Index Rate
+ue_gen_VenNameTB50,Vendor Name,UE gen_Vendors_DP,Yes,Business Process,Vendor
+uuu_cm5_code,Material Code,UF Material Inventory SKU DP,Yes,Material Inventory Manager,Material Inventory Manager
+title,Title (العنوان),UE gen_EstimateTemplate_DP,Yes,Business Process,Estimate
+title,Title (العنوان),CM Job Plan DP,Yes,Business Process,Job Plan
+ugenPropertyName,Property Name,Property DP1,Yes,Business Process,Prospective Property
+ue_si_StandardIssueTB255,Standard Issue,UE gen_StdIssues_DP,Yes,Business Process,Standard Issues
