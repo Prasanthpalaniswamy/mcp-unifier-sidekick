@@ -14,81 +14,25 @@ from tools.visualization_tools import generate_chart_image, generate_summary_das
 from tools.session_store import UNIFIER_SESSIONS, get_session_key
 from dotenv import load_dotenv
 from mcp.server.fastmcp import Context
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
+from auth import (
+    AuthMiddleware,
+    github_callback,
+    github_login,
+    login,
+)
 # from starlette.responses import JSONResponse
 # from starlette.responses import JSONResponse
-from jose import jwt, JWTError
-from datetime import datetime, timedelta, timedelta, UTC,timezone
-import bcrypt
 
 
 
 # Load variables from .env into the environment
 load_dotenv()
 MCP_API_KEY = os.getenv("MCP_API_KEY")
-JWT_SECRET = os.getenv("JWT_SECRET")
-JWT_ALGORITHM = "HS256"
-JWT_EXPIRATION_MINUTES = 60
-
-USERS = {
-    "admin": "$2b$12$dcrMYjKqPOMmlZt4LZkGPubgxIuO/JzVQ1famaDvX7UAu.7tKhfBe"
-}
-
-def create_jwt_token(username):
-
-    expiration = datetime.now(timezone.utc) + timedelta(
-        minutes=JWT_EXPIRATION_MINUTES
-    )
-
-    payload = {
-        "sub": username,
-        "exp": expiration
-    }
-
-    token = jwt.encode(
-        payload,
-        JWT_SECRET,
-        algorithm=JWT_ALGORITHM
-    )
-
-    return token
-
-async def login(request: Request):
-
-    body = await request.json()
-
-    username = body.get("username")
-    password = body.get("password")
-
-    # if USERS.get(username) != password:
-    #     return JSONResponse(
-    #         {"error": "Invalid credentials"},
-    #         status_code=401
-    #     )
-
-    stored_hash = USERS.get(username)
-
-    if not stored_hash:
-        return JSONResponse(
-            {"error": "Invalid credentials"},
-            status_code=401
-        )
-
-    if not bcrypt.checkpw(
-        password.encode(),
-        stored_hash.encode()
-    ):
-        return JSONResponse(
-            {"error": "Invalid credentials"},
-            status_code=401
-        )
-    token = create_jwt_token(username)
-
-    return JSONResponse({
-        "access_token": token,
-        "token_type": "bearer"
-    })
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USERNAME = os.getenv("SMTP_USERNAME")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+SMTP_SENDER_EMAIL = os.getenv("SMTP_SENDER_EMAIL", SMTP_USERNAME or "")
 
 mcp = FastMCP("Unifier Tools Server", host="0.0.0.0")
 
@@ -481,13 +425,19 @@ def send_email(
     attachment_paths: Optional comma-separated file paths.
     """
     try:
+        if not SMTP_USERNAME or not SMTP_PASSWORD or not SMTP_SENDER_EMAIL:
+            return (
+                "Error sending email: Missing SMTP configuration. "
+                "Please set SMTP_USERNAME, SMTP_PASSWORD, and SMTP_SENDER_EMAIL in the environment."
+            )
+
         attachments = [path.strip() for path in attachment_paths.split(",") if path.strip()]
         return send_email_via_smtp(
-            smtp_host="smtp.gmail.com",
-            smtp_port=587,
-            username="productivepmo@gmail.com",
-            password="jkxz gvwr ijcu jdhc",
-            sender_email="productivepmo@gmail.com",
+            smtp_host=SMTP_HOST,
+            smtp_port=SMTP_PORT,
+            username=SMTP_USERNAME,
+            password=SMTP_PASSWORD,
+            sender_email=SMTP_SENDER_EMAIL,
             to_emails=to_emails,
             subject=subject,
             body=body,
@@ -605,49 +555,16 @@ async def lifespan(app):
     async with mcp.session_manager.run():
         yield
 
-class AuthMiddleware(BaseHTTPMiddleware):
-
-    async def dispatch(self, request, call_next):
-
-        if request.url.path in ["/health", "/login"]:
-            return await call_next(request)
-
-        auth_header = request.headers.get("authorization")
-
-        if not auth_header:
-            return JSONResponse(
-                {"error": "Missing Authorization header"},
-                status_code=401
-            )
-
-        if not auth_header.startswith("Bearer "):
-            return JSONResponse(
-                {"error": "Invalid Authorization format"},
-                status_code=401
-            )
-
-        token = auth_header.split(" ")[1]
-
-        try:
-            payload = jwt.decode(
-                token,
-                JWT_SECRET,
-                algorithms=[JWT_ALGORITHM]
-            )
-
-            request.state.user = payload["sub"]
-
-        except JWTError:
-            return JSONResponse(
-                {"error": "Invalid or expired token"},
-                status_code=401
-            )
-
-        return await call_next(request)
-    
 app = Starlette(routes=[
     Route("/health", healthcheck),
     Route("/login", login, methods=["POST"]),
+    Route("/login/github", github_login),
+    Route(
+        "/auth/github/callback",
+        github_callback,
+        methods=["GET"],
+        name="github_callback"
+    ),
     Mount("/", app=mcp_app),
 ], lifespan=lifespan)
 
