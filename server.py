@@ -3,6 +3,7 @@ from datetime import datetime
 from contextlib import asynccontextmanager
 import pandas as pd
 from starlette.applications import Starlette
+from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import JSONResponse
 from starlette.routing import Route, Mount
 from mcp.server.fastmcp import FastMCP
@@ -28,6 +29,7 @@ from auth import (
 # Load variables from .env into the environment
 load_dotenv()
 MCP_API_KEY = os.getenv("MCP_API_KEY")
+SESSION_SECRET = os.getenv("SESSION_SECRET") or os.getenv("JWT_SECRET") or "dev-session-secret-change-me"
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USERNAME = os.getenv("SMTP_USERNAME")
@@ -568,6 +570,12 @@ app = Starlette(routes=[
     Mount("/", app=mcp_app),
 ], lifespan=lifespan)
 
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SESSION_SECRET,
+    same_site="lax",
+    https_only=os.getenv("ENV", "development").lower() in {"production", "prod"},
+)
 app.add_middleware(AuthMiddleware)
 
 if __name__ == "__main__":
